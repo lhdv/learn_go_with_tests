@@ -20,6 +20,11 @@ func Hello(name, lang string) string {
 		name = "World"
 	}
 
+	return greetingPrefix(lang) + name + "!"
+}
+
+func greetingPrefix(lang string) string {
+
 	prefix := englishHelloPrefix
 
 	switch lang {
@@ -31,7 +36,7 @@ func Hello(name, lang string) string {
 		prefix = portugueseHelloPrefix
 	}
 
-	return prefix + name + "!"
+	return prefix
 }
 
 func main() {
