@@ -9,16 +9,17 @@ func ConvertToRoman(num int) string {
 	var result strings.Builder
 
 	for i := num; i > 0; i-- {
-		result.WriteString("I")
 
 		if i == 4 {
-			return "IV"
+			result.WriteString("IV")
+			break
 		}
 
 		if i == 5 {
-			return "V"
+			result.WriteString("V")
+			break
 		}
-
+		result.WriteString("I")
 	}
 
 	return result.String()
