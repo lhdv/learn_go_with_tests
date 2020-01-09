@@ -27,16 +27,27 @@ var Numerals = []Numeral{
 
 // ConvertToRoman will convert a given int to its representative number
 // in Roman notation
-func ConvertToRoman(num int) string {
+func ConvertToRoman(arabic int) string {
 
 	var result strings.Builder
 
 	for _, numeral := range Numerals {
-		for num >= numeral.Value {
+		for arabic >= numeral.Value {
 			result.WriteString(numeral.Symbol)
-			num -= numeral.Value
+			arabic -= numeral.Value
 		}
 	}
 
 	return result.String()
+}
+
+// ConvertToArabic convert a given Roman symbol to an Arabic number
+func ConvertToArabic(roman string) int {
+	total := 0
+
+	for range roman {
+		total++
+	}
+
+	return total
 }
