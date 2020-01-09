@@ -2,29 +2,30 @@ package roman
 
 import "strings"
 
+// Numeral represents a numeral in Roman with its value in arabic number
+type Numeral struct {
+	Value  int
+	Symbol string
+}
+
+var Numerals = []Numeral{
+	{10, "X"},
+	{9, "IX"},
+	{5, "V"},
+	{4, "IV"},
+	{1, "I"},
+}
+
 // ConvertToRoman will convert a given int to its representative number
 // in Roman notation
 func ConvertToRoman(num int) string {
 
 	var result strings.Builder
 
-	for num > 0 {
-		switch {
-		case num > 9:
-			result.WriteString("X")
-			num -= 10
-		case num > 8:
-			result.WriteString("IX")
-			num -= 9
-		case num > 4:
-			result.WriteString("V")
-			num -= 5
-		case num > 3:
-			result.WriteString("IV")
-			num -= 4
-		default:
-			result.WriteString("I")
-			num--
+	for _, numeral := range Numerals {
+		for num >= numeral.Value {
+			result.WriteString(numeral.Symbol)
+			num -= numeral.Value
 		}
 	}
 
