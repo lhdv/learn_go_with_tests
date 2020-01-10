@@ -12,7 +12,8 @@ type Numeral struct {
 type Numerals []Numeral
 
 // ValueOf return the int value of a given symbol
-func (r Numerals) ValueOf(symbol string) int {
+func (r Numerals) ValueOf(symbols ...byte) int {
+	symbol := string(symbols)
 	for _, s := range r {
 		if s.Symbol == symbol {
 			return s.Value
@@ -64,22 +65,14 @@ func ConvertToArabic(roman string) int {
 
 		// look ahead to next symbol if we can and, the current symbol is base 10 (only valid subtractors)
 		if couldBeSubtractive(i, symbol, roman) {
-			nextSymbol := roman[i+1]
-
-			// build the two character string
-			potentialNumber := string([]byte{symbol, nextSymbol})
-
-			// get the value of the two character string
-			value := numerals.ValueOf(potentialNumber)
-
-			if value != 0 {
+			if value := numerals.ValueOf(symbol, roman[i+1]); value != 0 {
 				total += value
 				i++ // move past this character too for the next loop
 			} else {
 				total++
 			}
 		} else {
-			total += numerals.ValueOf(string([]byte{symbol}))
+			total += numerals.ValueOf(symbol)
 		}
 	}
 
