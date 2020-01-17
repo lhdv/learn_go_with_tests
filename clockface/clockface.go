@@ -75,6 +75,10 @@ func SecondHand(t time.Time) Point {
 	return p
 }
 
+func minutesInRadians(t time.Time) float64 {
+	return (secondsInRadians(t) / 60) + (math.Pi / (30 / float64(t.Minute())))
+}
+
 func secondsInRadians(t time.Time) float64 {
 	return math.Pi / (30 / float64(t.Second()))
 }

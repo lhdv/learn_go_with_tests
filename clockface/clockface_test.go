@@ -30,6 +30,25 @@ func TestSecondHandAt30Seconds(t *testing.T) {
 	}
 }
 
+func TestMinutesInRadians(t *testing.T) {
+	cases := []struct {
+		time  time.Time
+		angle float64
+	}{
+		{simpleTime(0, 30, 0), math.Pi},
+		{simpleTime(0, 0, 7), 7 * (math.Pi / (30 * 60))},
+	}
+
+	for _, c := range cases {
+		t.Run(testName(c.time), func(t *testing.T) {
+			got := minutesInRadians(c.time)
+			if got != c.angle {
+				t.Fatalf("Wanted %v radians, bit got %v", c.angle, got)
+			}
+		})
+	}
+}
+
 func TestSecondsInRadians(t *testing.T) {
 
 	cases := []struct {
@@ -95,6 +114,35 @@ func TestSVGWriterAtMidnnight(t *testing.T) {
 
 }
 
+func TestSVGWriterMinuteHand(t *testing.T) {
+	cases := []struct {
+		time time.Time
+		line Line
+	}{
+		{
+			simpleTime(0, 0, 0),
+			Line{150, 150, 150, 60},
+		},
+	}
+
+	for _, c := range cases {
+		t.Run(testName(c.time), func(t *testing.T) {
+			b := bytes.Buffer{}
+			SVGWriter(&b, c.time)
+
+			svg := SVG{}
+			err := xml.Unmarshal(b.Bytes(), &svg)
+			if err != nil {
+				t.Errorf("Unmarshaling error %v, on %+v", err, c.time)
+			}
+
+			if !containsLine(c.line, svg.Line) {
+				t.Errorf("Expected to find the minute hand line %+v, int the SVG lines %+v", c.line, svg.Line)
+			}
+		})
+	}
+}
+
 func roughlyEqualFloat64(a, b float64) bool {
 	const equalityThreshold = 1e-7
 	return math.Abs(a-b) < equalityThreshold
@@ -103,4 +151,14 @@ func roughlyEqualFloat64(a, b float64) bool {
 func roughlyEqualPoint(a, b Point) bool {
 	return roughlyEqualFloat64(a.X, b.X) &&
 		roughlyEqualFloat64(a.Y, b.Y)
+}
+
+func containsLine(line Line, lines []Line) bool {
+	for _, l := range lines {
+		if l == line {
+			return true
+		}
+	}
+
+	return false
 }
