@@ -8,6 +8,7 @@ import (
 	"time"
 )
 
+const minuteHandLength = 80
 const secondHandLength = 90
 const clockCentreX = 150
 const clockCentreY = 150
@@ -93,19 +94,19 @@ func testName(t time.Time) string {
 }
 
 func minuteHand(w io.Writer, t time.Time) {
-	p := minuteHandPoint(t)
-	p = Point{p.X * secondHandLength, p.Y * secondHandLength} // scale
-	p = Point{p.X, -p.Y}                                      // flip
-	p = Point{p.X + clockCentreX, p.Y + clockCentreY}         // translate
+	p := makeHand(minuteHandPoint(t), minuteHandLength)
 	fmt.Fprintf(w, `<line x1="150" y1="150" x2="%.3f" y2="%.3f" style="fill:none;stroke:#000;stroke-width:3px;" />`, p.X, p.Y)
 }
 
 func secondHand(w io.Writer, t time.Time) {
-	p := secondHandPoint(t)
-	p = Point{p.X * secondHandLength, p.Y * secondHandLength} // scale
-	p = Point{p.X, -p.Y}                                      // flip
-	p = Point{p.X + clockCentreX, p.Y + clockCentreY}         // translate
+	p := makeHand(secondHandPoint(t), secondHandLength)
 	fmt.Fprintf(w, `<line x1="150" y1="150" x2="%.3f" y2="%.3f" style="fill:none;stroke:#f00;stroke-width:3px;" />`, p.X, p.Y)
+}
+
+func makeHand(p Point, length float64) Point {
+	p = Point{p.X * length, p.Y * length}                // scale
+	p = Point{p.X, -p.Y}                                 // flip
+	return Point{p.X + clockCentreX, p.Y + clockCentreY} // translate
 }
 
 func minuteHandPoint(t time.Time) Point {
