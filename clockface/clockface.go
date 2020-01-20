@@ -99,6 +99,14 @@ func secondHand(w io.Writer, t time.Time) {
 	fmt.Fprintf(w, `<line x1="150" y1="150" x2="%.3f" y2="%.3f" style="fill:none;stroke:#f00;stroke-width:3px;" />`, p.X, p.Y)
 }
 
+func minuteHandPoint(t time.Time) Point {
+	angle := minutesInRadians(t)
+	x := math.Sin(angle)
+	y := math.Cos(angle)
+
+	return Point{x, y}
+}
+
 func secondHandPoint(t time.Time) Point {
 	angle := secondsInRadians(t)
 	x := math.Sin(angle)
