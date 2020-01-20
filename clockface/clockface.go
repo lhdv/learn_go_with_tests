@@ -61,6 +61,7 @@ type Line struct {
 func SVGWriter(w io.Writer, t time.Time) {
 	io.WriteString(w, svgStart)
 	io.WriteString(w, bezel)
+	minuteHand(w, t)
 	secondHand(w, t)
 	io.WriteString(w, svgEnd)
 }
@@ -89,6 +90,14 @@ func simpleTime(hours, minutes, seconds int) time.Time {
 
 func testName(t time.Time) string {
 	return t.Format("15:04:05")
+}
+
+func minuteHand(w io.Writer, t time.Time) {
+	p := minuteHandPoint(t)
+	p = Point{p.X * secondHandLength, p.Y * secondHandLength} // scale
+	p = Point{p.X, -p.Y}                                      // flip
+	p = Point{p.X + clockCentreX, p.Y + clockCentreY}         // translate
+	fmt.Fprintf(w, `<line x1="150" y1="150" x2="%.3f" y2="%.3f" style="fill:none;stroke:#000;stroke-width:3px;" />`, p.X, p.Y)
 }
 
 func secondHand(w io.Writer, t time.Time) {
