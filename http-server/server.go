@@ -13,6 +13,12 @@ type PlayerServer struct {
 
 // ServeHTTP serve to handle GET/POST requests
 func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+
+	if r.Method == http.MethodPost {
+		w.WriteHeader(http.StatusAccepted)
+		return
+	}
+
 	player := strings.TrimPrefix(r.URL.Path, "/players/")
 
 	score := p.store.GetPlayerScore(player)
