@@ -8,6 +8,25 @@ import (
 	"time"
 )
 
+func TesHourHandPoint(t *testing.T) {
+	cases := []struct {
+		time  time.Time
+		point Point
+	}{
+		{simpleTime(6, 0, 0), Point{0, -1}},
+		{simpleTime(21, 0, 0), Point{-1, 0}},
+	}
+
+	for _, c := range cases {
+		t.Run(testName(c.time), func(t *testing.T) {
+			got := hourHandPoint(c.time)
+			if !roughlyEqualPoint(got, c.point) {
+				t.Fatalf("Wanted %v Point, but got %v", c.point, got)
+			}
+		})
+	}
+}
+
 func TestMinuteHandPoint(t *testing.T) {
 	cases := []struct {
 		time  time.Time
@@ -130,31 +149,31 @@ func TestSecondHandVector(t *testing.T) {
 	}
 }
 
-// func TestSVGWriterHourHand(t *testing.T) {
-// 	cases := []struct {
-// 		time time.Time
-// 		line Line
-// 	}{
-// 		{
-// 			simpleTime(6, 0, 0),
-// 			Line{150, 150, 150, 200},
-// 		},
-// 	}
+func TestSVGWriterHourHand(t *testing.T) {
+	cases := []struct {
+		time time.Time
+		line Line
+	}{
+		{
+			simpleTime(6, 0, 0),
+			Line{150, 150, 150, 200},
+		},
+	}
 
-// 	for _, c := range cases {
-// 		t.Run(testName(c.time), func(t *testing.T) {
-// 			b := bytes.Buffer{}
-// 			SVGWriter(&b, c.time)
+	for _, c := range cases {
+		t.Run(testName(c.time), func(t *testing.T) {
+			b := bytes.Buffer{}
+			SVGWriter(&b, c.time)
 
-// 			svg := SVG{}
-// 			xml.Unmarshal(b.Bytes(), &svg)
+			svg := SVG{}
+			xml.Unmarshal(b.Bytes(), &svg)
 
-// 			if !containsLine(c.line, svg.Line) {
-// 				t.Errorf("Expected to find the hour hand line %+v, in the SVG lines %+v", c.line, svg.Line)
-// 			}
-// 		})
-// 	}
-// }
+			if !containsLine(c.line, svg.Line) {
+				t.Errorf("Expected to find the hour hand line %+v, in the SVG lines %+v", c.line, svg.Line)
+			}
+		})
+	}
+}
 
 func TestSVGWriterAtMidnnight(t *testing.T) {
 	tm := time.Date(1377, time.January, 1, 0, 0, 0, 0, time.UTC)
