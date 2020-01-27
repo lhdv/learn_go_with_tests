@@ -25,7 +25,7 @@ func (s *StubPlayerStore) RecordWin(name string) {
 func TestRecordingWinsAndRetrievingThem(t *testing.T) {
 	t.Run("3 sequential POST calls should return score 3", func(t *testing.T) {
 		store := NewInMemoryPlayerStore()
-		server := PlayerServer{store}
+		server := NewPlayerServer(store)
 		player := "Pepper"
 
 		server.ServeHTTP(httptest.NewRecorder(), newPostWinRequest(player))
@@ -45,7 +45,7 @@ func TestRecordingWinsAndRetrievingThem(t *testing.T) {
 		calls := 100
 		score := "100"
 		store := NewInMemoryPlayerStore()
-		server := PlayerServer{store}
+		server := NewPlayerServer(store)
 		player := "Bob"
 
 		var wg sync.WaitGroup
@@ -78,7 +78,7 @@ func TestGetPlayers(t *testing.T) {
 		},
 		nil,
 	}
-	server := &PlayerServer{&store}
+	server := NewPlayerServer(&store)
 
 	t.Run("returns Pepper's score", func(t *testing.T) {
 		request := newGetScoreRequest("Pepper")
@@ -115,7 +115,7 @@ func TestStoreWins(t *testing.T) {
 		map[string]int{},
 		nil,
 	}
-	server := &PlayerServer{&store}
+	server := NewPlayerServer(&store)
 
 	t.Run("it records wins on POST", func(t *testing.T) {
 		player := "Pepper"
@@ -143,7 +143,7 @@ func TestLeague(t *testing.T) {
 		map[string]int{},
 		nil,
 	}
-	server := PlayerServer{&store}
+	server := NewPlayerServer(&store)
 
 	t.Run("it return 200 on /league", func(t *testing.T) {
 		request, _ := http.NewRequest(http.MethodGet, "/league", nil)
