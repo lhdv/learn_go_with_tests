@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"sync"
 	"testing"
 )
 
@@ -22,21 +23,51 @@ func (s *StubPlayerStore) RecordWin(name string) {
 }
 
 func TestRecordingWinsAndRetrievingThem(t *testing.T) {
-	store := InMemoryPlayerStore{map[string]int{}}
-	server := PlayerServer{&store}
-	player := "Pepper"
+	t.Run("3 sequential POST calls should return score 3", func(t *testing.T) {
+		store := NewInMemoryPlayerStore()
+		server := PlayerServer{store}
+		player := "Pepper"
 
-	server.ServeHTTP(httptest.NewRecorder(), newPostWinRequest(player))
-	server.ServeHTTP(httptest.NewRecorder(), newPostWinRequest(player))
-	server.ServeHTTP(httptest.NewRecorder(), newPostWinRequest(player))
+		server.ServeHTTP(httptest.NewRecorder(), newPostWinRequest(player))
+		server.ServeHTTP(httptest.NewRecorder(), newPostWinRequest(player))
+		server.ServeHTTP(httptest.NewRecorder(), newPostWinRequest(player))
 
-	request := newGetScoreRequest("Pepper")
-	response := httptest.NewRecorder()
+		request := newGetScoreRequest("Pepper")
+		response := httptest.NewRecorder()
 
-	server.ServeHTTP(response, request)
+		server.ServeHTTP(response, request)
 
-	assertStatus(t, response.Code, http.StatusOK)
-	assertResponseBody(t, response.Body.String(), "3")
+		assertStatus(t, response.Code, http.StatusOK)
+		assertResponseBody(t, response.Body.String(), "3")
+	})
+
+	t.Run("1000 parallel POST calls should return score 1000", func(t *testing.T) {
+		calls := 100
+		score := "100"
+		store := NewInMemoryPlayerStore()
+		server := PlayerServer{store}
+		player := "Bob"
+
+		var wg sync.WaitGroup
+		wg.Add(calls)
+
+		for i := 0; i < calls; i++ {
+			go func(w *sync.WaitGroup) {
+				server.ServeHTTP(httptest.NewRecorder(), newPostWinRequest(player))
+				w.Done()
+			}(&wg)
+		}
+
+		wg.Wait()
+
+		request := newGetScoreRequest(player)
+		response := httptest.NewRecorder()
+
+		server.ServeHTTP(response, request)
+
+		assertStatus(t, response.Code, http.StatusOK)
+		assertResponseBody(t, response.Body.String(), score)
+	})
 }
 
 func TestGetPlayers(t *testing.T) {
