@@ -43,16 +43,3 @@ type PlayerStore interface {
 	GetPlayerScore(name string) int
 	RecordWin(name string)
 }
-
-// GetPlayerScore return the player score
-// func GetPlayerScore(name string) int {
-// 	if name == "Pepper" {
-// 		return 20
-// 	}
-
-// 	if name == "Floyd" {
-// 		return 10
-// 	}
-
-// 	return 0
-// }

@@ -136,19 +136,6 @@ func TestStoreWins(t *testing.T) {
 		}
 
 	})
-
-	// t.Run("it returns accepted on POST", func(t *testing.T) {
-	// 	request := newPostWinRequest("Pepper")
-	// 	response := httptest.NewRecorder()
-
-	// 	server.ServeHTTP(response, request)
-
-	// 	assertStatus(t, response.Code, http.StatusAccepted)
-
-	// 	if len(store.winCalls) != 1 {
-	// 		t.Errorf("got %d calls to RecordWin want %d", len(store.winCalls), 1)
-	// 	}
-	// })
 }
 
 func newPostWinRequest(name string) *http.Request {
