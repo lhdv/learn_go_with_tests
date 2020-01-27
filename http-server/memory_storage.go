@@ -4,20 +4,22 @@ import "sync"
 
 // InMemoryPlayerStore is a temp storage in-memory for player's score
 type InMemoryPlayerStore struct {
-	mu    sync.Mutex
+	mu    sync.RWMutex
 	store map[string]int
 }
 
 // NewInMemoryPlayerStore returns a new in-memory storage
 func NewInMemoryPlayerStore() *InMemoryPlayerStore {
 	return &InMemoryPlayerStore{
-		sync.Mutex{},
+		sync.RWMutex{},
 		map[string]int{},
 	}
 }
 
 // GetPlayerScore will get player's score from memory
 func (i *InMemoryPlayerStore) GetPlayerScore(name string) int {
+	i.mu.RLock()
+	defer i.mu.RUnlock()
 	score := i.store[name]
 	return score
 }
