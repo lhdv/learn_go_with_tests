@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"reflect"
 	"sync"
 	"testing"
 )
@@ -12,6 +13,7 @@ import (
 type StubPlayerStore struct {
 	scores   map[string]int
 	winCalls []string
+	league   []Player
 }
 
 func (s *StubPlayerStore) GetPlayerScore(name string) int {
@@ -21,6 +23,10 @@ func (s *StubPlayerStore) GetPlayerScore(name string) int {
 
 func (s *StubPlayerStore) RecordWin(name string) {
 	s.winCalls = append(s.winCalls, name)
+}
+
+func (s *StubPlayerStore) GetLeague() []Player {
+	return s.league
 }
 
 func TestRecordingWinsAndRetrievingThem(t *testing.T) {
@@ -78,6 +84,7 @@ func TestGetPlayers(t *testing.T) {
 			"Floyd":  10,
 		},
 		nil,
+		nil,
 	}
 	server := NewPlayerServer(&store)
 
@@ -112,10 +119,7 @@ func TestGetPlayers(t *testing.T) {
 }
 
 func TestStoreWins(t *testing.T) {
-	store := StubPlayerStore{
-		map[string]int{},
-		nil,
-	}
+	store := StubPlayerStore{}
 	server := NewPlayerServer(&store)
 
 	t.Run("it records wins on POST", func(t *testing.T) {
@@ -140,7 +144,12 @@ func TestStoreWins(t *testing.T) {
 }
 
 func TestLeague(t *testing.T) {
-	store := StubPlayerStore{}
+	wantedLeague := []Player{
+		{"Chris", 20},
+		{"Cleo", 32},
+		{"Foobar", 14},
+	}
+	store := StubPlayerStore{nil, nil, wantedLeague}
 	server := NewPlayerServer(&store)
 
 	t.Run("it return 200 on /league", func(t *testing.T) {
@@ -157,6 +166,10 @@ func TestLeague(t *testing.T) {
 		}
 
 		assertStatus(t, response.Code, http.StatusOK)
+
+		if !reflect.DeepEqual(got, wantedLeague) {
+			t.Errorf("got %v want %v", got, wantedLeague)
+		}
 	})
 }
 

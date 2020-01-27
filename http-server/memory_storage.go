@@ -30,3 +30,8 @@ func (i *InMemoryPlayerStore) RecordWin(name string) {
 	defer i.mu.Unlock()
 	i.store[name]++
 }
+
+// GetLeague gets all player's score from memory
+func (i *InMemoryPlayerStore) GetLeague() []Player {
+	return nil
+}
