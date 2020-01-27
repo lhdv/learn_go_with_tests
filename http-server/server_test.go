@@ -11,6 +11,8 @@ import (
 	"testing"
 )
 
+const jsonContentType = "application/json"
+
 type StubPlayerStore struct {
 	scores   map[string]int
 	winCalls []string
@@ -163,13 +165,17 @@ func TestLeague(t *testing.T) {
 		got := getLeagueFromResponse(t, response.Body)
 		assertStatus(t, response.Code, http.StatusOK)
 		assertLeague(t, got, wantedLeague)
-
-		if response.Result().Header.Get("content-type") != "application/json" {
-			t.Errorf("response did not have content-type of application/json, got %v", response.Result().Header)
-		}
+		assertContentType(t, response, jsonContentType)
 	})
 }
 
+func assertContentType(t *testing.T, response *httptest.ResponseRecorder, want string) {
+	t.Helper()
+
+	if response.Result().Header.Get("content-type") != want {
+		t.Errorf("response did not have content-type of %s, got %v", want, response.Result().Header)
+	}
+}
 func assertLeague(t *testing.T, got, wanted []Player) {
 	t.Helper()
 	if !reflect.DeepEqual(got, wanted) {
