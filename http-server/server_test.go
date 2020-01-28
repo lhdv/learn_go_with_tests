@@ -32,23 +32,38 @@ func (s *StubPlayerStore) GetLeague() []Player {
 	return s.league
 }
 
+//
+// Integration tests
+//
 func TestRecordingWinsAndRetrievingThem(t *testing.T) {
-	t.Run("3 sequential POST calls should return score 3", func(t *testing.T) {
-		store := NewInMemoryPlayerStore()
-		server := NewPlayerServer(store)
-		player := "Pepper"
+	store := NewInMemoryPlayerStore()
+	server := NewPlayerServer(store)
+	player := "Pepper"
 
-		server.ServeHTTP(httptest.NewRecorder(), newPostWinRequest(player))
-		server.ServeHTTP(httptest.NewRecorder(), newPostWinRequest(player))
-		server.ServeHTTP(httptest.NewRecorder(), newPostWinRequest(player))
+	server.ServeHTTP(httptest.NewRecorder(), newPostWinRequest(player))
+	server.ServeHTTP(httptest.NewRecorder(), newPostWinRequest(player))
+	server.ServeHTTP(httptest.NewRecorder(), newPostWinRequest(player))
 
-		request := newGetScoreRequest("Pepper")
+	t.Run("get score", func(t *testing.T) {
 		response := httptest.NewRecorder()
 
-		server.ServeHTTP(response, request)
+		server.ServeHTTP(response, newGetScoreRequest("Pepper"))
 
 		assertStatus(t, response.Code, http.StatusOK)
 		assertResponseBody(t, response.Body.String(), "3")
+	})
+
+	t.Run("get league", func(t *testing.T) {
+		response := httptest.NewRecorder()
+
+		server.ServeHTTP(response, newRequestLeague())
+
+		assertStatus(t, response.Code, http.StatusOK)
+		got := getLeagueFromResponse(t, response.Body)
+		want := []Player{
+			{"Pepper", 3},
+		}
+		assertLeague(t, got, want)
 	})
 
 	t.Run("1000 parallel POST calls should return score 1000", func(t *testing.T) {
@@ -80,6 +95,9 @@ func TestRecordingWinsAndRetrievingThem(t *testing.T) {
 	})
 }
 
+//
+// Unit tests
+//
 func TestGetPlayers(t *testing.T) {
 	store := StubPlayerStore{
 		map[string]int{
