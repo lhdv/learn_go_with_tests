@@ -1,20 +1,17 @@
 package main
 
 import (
-	"encoding/json"
 	"io"
 )
 
 // FileSystemPlayerStore save player data in file system
 type FileSystemPlayerStore struct {
-	database io.Reader
+	database io.ReadSeeker
 }
 
 // GetLeague return a Player array
 func (fs *FileSystemPlayerStore) GetLeague() []Player {
-	var league []Player
-
-	json.NewDecoder(fs.database).Decode(&league)
-
+	fs.database.Seek(0, 0)
+	league, _ := NewLeague(fs.database)
 	return league
 }
