@@ -72,10 +72,3 @@ func (p *PlayerServer) showScore(w http.ResponseWriter, player string) {
 
 	fmt.Fprint(w, score)
 }
-
-// Deprecated
-func (p *PlayerServer) getLeagueTable() []Player {
-	return []Player{
-		{"Chris", 20},
-	}
-}
