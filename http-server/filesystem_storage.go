@@ -11,7 +11,7 @@ type FileSystemPlayerStore struct {
 }
 
 // GetLeague return a Player array
-func (fs *FileSystemPlayerStore) GetLeague() []Player {
+func (fs *FileSystemPlayerStore) GetLeague() League {
 	fs.database.Seek(0, 0)
 	league, _ := NewLeague(fs.database)
 	return league
@@ -19,26 +19,23 @@ func (fs *FileSystemPlayerStore) GetLeague() []Player {
 
 // GetPlayerScore return a player's score by its name
 func (fs *FileSystemPlayerStore) GetPlayerScore(name string) int {
-	var wins int
 
-	for _, player := range fs.GetLeague() {
-		if player.Name == name {
-			wins = player.Wins
-			break
-		}
+	player := fs.GetLeague().Find(name)
+
+	if player != nil {
+		return player.Wins
 	}
 
-	return wins
+	return 0
 }
 
 // RecordWin increment player's score
 func (fs *FileSystemPlayerStore) RecordWin(name string) {
 	league := fs.GetLeague()
+	player := league.Find(name)
 
-	for i, player := range league {
-		if player.Name == name {
-			league[i].Wins++
-		}
+	if player != nil {
+		player.Wins++
 	}
 
 	fs.database.Seek(0, 0)
