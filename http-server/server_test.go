@@ -38,7 +38,9 @@ func (s *StubPlayerStore) GetLeague() League {
 // Integration tests
 //
 func TestRecordingWinsAndRetrievingThem(t *testing.T) {
-	store := NewInMemoryPlayerStore()
+	database, cleanDatabase := createTempFile(t, "")
+	defer cleanDatabase()
+	store := NewFileSystemPlayerStore(database)
 	server := NewPlayerServer(store)
 	player := "Pepper"
 
@@ -69,9 +71,12 @@ func TestRecordingWinsAndRetrievingThem(t *testing.T) {
 	})
 
 	t.Run("1000 parallel POST calls should return score 1000", func(t *testing.T) {
-		calls := 100
-		score := "100"
-		store := NewInMemoryPlayerStore()
+		calls := 1000
+		score := "1000"
+		// store := NewInMemoryPlayerStore()
+		database, cleanDatabase := createTempFile(t, "")
+		defer cleanDatabase()
+		store := NewFileSystemPlayerStore(database)
 		server := NewPlayerServer(store)
 		player := "Bob"
 
@@ -197,7 +202,7 @@ func TestFileSystemStore(t *testing.T) {
 		]`)
 		defer cleanDatabase()
 
-		store := FileSystemPlayerStore{database}
+		store := NewFileSystemPlayerStore(database)
 
 		got := store.GetLeague()
 
@@ -220,7 +225,7 @@ func TestFileSystemStore(t *testing.T) {
 		]`)
 		defer cleanDatabase()
 
-		store := FileSystemPlayerStore{database}
+		store := NewFileSystemPlayerStore(database)
 
 		got := store.GetPlayerScore("Chris")
 		want := 33
@@ -235,12 +240,28 @@ func TestFileSystemStore(t *testing.T) {
 		]`)
 		defer cleanDatabase()
 
-		store := FileSystemPlayerStore{database}
+		store := NewFileSystemPlayerStore(database)
 
 		store.RecordWin("Chris")
 
 		got := store.GetPlayerScore("Chris")
 		want := 34
+		assertScoreEquals(t, got, want)
+	})
+
+	t.Run("store wins for new players", func(t *testing.T) {
+		database, cleanDatabase := createTempFile(t, `[
+			{"Name": "Cleo", "Wins": 10},
+			{"Name": "Chris", "Wins": 33}
+		]`)
+		defer cleanDatabase()
+
+		store := NewFileSystemPlayerStore(database)
+
+		store.RecordWin("Pepper")
+
+		got := store.GetPlayerScore("Pepper")
+		want := 1
 		assertScoreEquals(t, got, want)
 	})
 }
