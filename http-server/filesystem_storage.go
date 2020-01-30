@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"io"
 	"os"
 	"sync"
 )
@@ -10,17 +9,17 @@ import (
 // FileSystemPlayerStore save player data in file system
 type FileSystemPlayerStore struct {
 	mu       sync.RWMutex
-	database io.Writer
+	database *json.Encoder
 	league   League
 }
 
 // NewFileSystemPlayerStore create a new store
-func NewFileSystemPlayerStore(db *os.File) *FileSystemPlayerStore {
-	db.Seek(0, 0)
-	league, _ := NewLeague(db)
+func NewFileSystemPlayerStore(file *os.File) *FileSystemPlayerStore {
+	file.Seek(0, 0)
+	league, _ := NewLeague(file)
 	return &FileSystemPlayerStore{
 		sync.RWMutex{},
-		&tape{db},
+		json.NewEncoder(&tape{file}),
 		league,
 	}
 }
@@ -57,5 +56,5 @@ func (fs *FileSystemPlayerStore) RecordWin(name string) {
 		fs.league = append(fs.league, Player{name, 1})
 	}
 
-	json.NewEncoder(fs.database).Encode(fs.league)
+	fs.database.Encode(fs.league)
 }
