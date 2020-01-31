@@ -4,12 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"reflect"
-	"sync"
 	"testing"
 )
 
@@ -32,80 +29,6 @@ func (s *StubPlayerStore) RecordWin(name string) {
 
 func (s *StubPlayerStore) GetLeague() League {
 	return s.league
-}
-
-//
-// Integration tests
-//
-func TestRecordingWinsAndRetrievingThem(t *testing.T) {
-	database, cleanDatabase := createTempFile(t, `[]`)
-	defer cleanDatabase()
-
-	store, err := NewFileSystemPlayerStore(database)
-	assertNoError(t, err)
-
-	server := NewPlayerServer(store)
-	player := "Pepper"
-
-	server.ServeHTTP(httptest.NewRecorder(), newPostWinRequest(player))
-	server.ServeHTTP(httptest.NewRecorder(), newPostWinRequest(player))
-	server.ServeHTTP(httptest.NewRecorder(), newPostWinRequest(player))
-
-	t.Run("get score", func(t *testing.T) {
-		response := httptest.NewRecorder()
-
-		server.ServeHTTP(response, newGetScoreRequest("Pepper"))
-
-		assertStatus(t, response.Code, http.StatusOK)
-		assertResponseBody(t, response.Body.String(), "3")
-	})
-
-	t.Run("get league", func(t *testing.T) {
-		response := httptest.NewRecorder()
-
-		server.ServeHTTP(response, newRequestLeague())
-
-		assertStatus(t, response.Code, http.StatusOK)
-		got := getLeagueFromResponse(t, response.Body)
-		want := []Player{
-			{"Pepper", 3},
-		}
-		assertLeague(t, got, want)
-	})
-
-	t.Run("1000 parallel POST calls should return score 1000", func(t *testing.T) {
-		calls := 1000
-		score := "1000"
-		// store := NewInMemoryPlayerStore()
-		database, cleanDatabase := createTempFile(t, `[]`)
-		defer cleanDatabase()
-
-		store, err := NewFileSystemPlayerStore(database)
-		assertNoError(t, err)
-
-		server := NewPlayerServer(store)
-		player := "Bob"
-
-		var wg sync.WaitGroup
-		wg.Add(calls)
-
-		for i := 0; i < calls; i++ {
-			go func(w *sync.WaitGroup) {
-				server.ServeHTTP(httptest.NewRecorder(), newPostWinRequest(player))
-				w.Done()
-			}(&wg)
-		}
-
-		wg.Wait()
-
-		request := newGetScoreRequest(player)
-		response := httptest.NewRecorder()
-
-		server.ServeHTTP(response, request)
-
-		assertStatus(t, response.Code, http.StatusOK)
-		assertResponseBody(t, response.Body.String(), score)
-	})
 }
 
 //
@@ -200,40 +123,6 @@ func TestLeague(t *testing.T) {
 	})
 }
 
-func createTempFile(t *testing.T, initialData string) (*os.File, func()) {
-	t.Helper()
-
-	tmpFile, err := ioutil.TempFile("", "db")
-	if err != nil {
-		t.Fatalf("could not create temp file %v", err)
-	}
-
-	tmpFile.Write([]byte(initialData))
-
-	removeFile := func() {
-		tmpFile.Close()
-		os.Remove(tmpFile.Name())
-	}
-
-	return tmpFile, removeFile
-}
-
-func assertNoError(t *testing.T, err error) {
-	t.Helper()
-
-	if err != nil {
-		t.Fatalf("didn't expect an error but got one, %v", err)
-	}
-}
-
-func assertScoreEquals(t *testing.T, got, want int) {
-	t.Helper()
-
-	if got != want {
-		t.Errorf("got %d want %d score", got, want)
-	}
-}
-
 func assertContentType(t *testing.T, response *httptest.ResponseRecorder, want string) {
 	t.Helper()
 
@@ -245,6 +134,13 @@ func assertLeague(t *testing.T, got, wanted []Player) {
 	t.Helper()
 	if !reflect.DeepEqual(got, wanted) {
 		t.Errorf("got %v want %v", got, wanted)
+	}
+}
+
+func assertStatus(t *testing.T, got, want int) {
+	t.Helper()
+	if got != want {
+		t.Errorf("did not get correct status, got %d, want %d", got, want)
 	}
 }
 
@@ -280,12 +176,5 @@ func assertResponseBody(t *testing.T, got, want string) {
 	t.Helper()
 	if got != want {
 		t.Errorf("got %q, want %q", got, want)
-	}
-}
-
-func assertStatus(t *testing.T, got, want int) {
-	t.Helper()
-	if got != want {
-		t.Errorf("did not get correct status, got %d, want %d", got, want)
 	}
 }

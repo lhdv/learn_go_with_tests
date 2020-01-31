@@ -1,6 +1,10 @@
 package main
 
-import "testing"
+import (
+	"io/ioutil"
+	"os"
+	"testing"
+)
 
 func TestFileSystemStore(t *testing.T) {
 	t.Run("league sorted", func(t *testing.T) {
@@ -84,4 +88,38 @@ func TestFileSystemStore(t *testing.T) {
 		_, err := NewFileSystemPlayerStore(database)
 		assertNoError(t, err)
 	})
+}
+
+func createTempFile(t *testing.T, initialData string) (*os.File, func()) {
+	t.Helper()
+
+	tmpFile, err := ioutil.TempFile("", "db")
+	if err != nil {
+		t.Fatalf("could not create temp file %v", err)
+	}
+
+	tmpFile.Write([]byte(initialData))
+
+	removeFile := func() {
+		tmpFile.Close()
+		os.Remove(tmpFile.Name())
+	}
+
+	return tmpFile, removeFile
+}
+
+func assertNoError(t *testing.T, err error) {
+	t.Helper()
+
+	if err != nil {
+		t.Fatalf("didn't expect an error but got one, %v", err)
+	}
+}
+
+func assertScoreEquals(t *testing.T, got, want int) {
+	t.Helper()
+
+	if got != want {
+		t.Errorf("got %d want %d score", got, want)
+	}
 }
