@@ -9,14 +9,26 @@ import (
 // CLI struct to handle the command line application
 type CLI struct {
 	playerStore PlayerStore
-	in          io.Reader
+	in          *bufio.Scanner
+}
+
+// NewCLI return a new CLI struct based on a given store and io.Reader
+func NewCLI(store PlayerStore, in io.Reader) *CLI {
+	return &CLI{
+		store,
+		bufio.NewScanner(in),
+	}
 }
 
 // PlayPoker start a poker game
 func (c *CLI) PlayPoker() {
-	reader := bufio.NewScanner(c.in)
-	reader.Scan()
-	c.playerStore.RecordWin(extractWinner(reader.Text()))
+	userInput := c.readLine()
+	c.playerStore.RecordWin(extractWinner(userInput))
+}
+
+func (c *CLI) readLine() string {
+	c.in.Scan()
+	return c.in.Text()
 }
 
 func extractWinner(userInput string) string {
