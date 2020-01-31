@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"sort"
 	"sync"
 )
 
@@ -36,6 +37,9 @@ func NewFileSystemPlayerStore(file *os.File) (*FileSystemPlayerStore, error) {
 
 // GetLeague return a Player array
 func (fs *FileSystemPlayerStore) GetLeague() League {
+	sort.Slice(fs.league, func(i, j int) bool {
+		return fs.league[i].Wins > fs.league[j].Wins
+	})
 	return fs.league
 }
 
