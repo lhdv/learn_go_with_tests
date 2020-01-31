@@ -89,13 +89,7 @@ func TestStoreWins(t *testing.T) {
 
 		assertStatus(t, response.Code, http.StatusAccepted)
 
-		if len(store.winCalls) != 1 {
-			t.Fatalf("got %d calls to RecordWin want %d", len(store.winCalls), 1)
-		}
-
-		if store.winCalls[0] != player {
-			t.Errorf("did not store correct winner got %q want %q", store.winCalls[0], player)
-		}
+		assertPlayerWin(t, &store, player)
 
 	})
 }
@@ -121,6 +115,18 @@ func TestLeague(t *testing.T) {
 		assertLeague(t, got, wantedLeague)
 		assertContentType(t, response, jsonContentType)
 	})
+}
+
+func assertPlayerWin(t *testing.T, store *StubPlayerStore, winner string) {
+	t.Helper()
+
+	if len(store.winCalls) != 1 {
+		t.Fatalf("got %d calls to RecordWin want %d", len(store.winCalls), 1)
+	}
+
+	if store.winCalls[0] != winner {
+		t.Errorf("did not store correct winner got %q want %q", store.winCalls[0], winner)
+	}
 }
 
 func assertContentType(t *testing.T, response *httptest.ResponseRecorder, want string) {
