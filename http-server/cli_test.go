@@ -57,19 +57,6 @@ func TestCLI(t *testing.T) {
 		cli := poker.NewCLI(playerStore, in, blindAlerter)
 		cli.PlayPoker()
 
-		if len(blindAlerter.alerts) != 1 {
-			t.Fatal("expected a blind alert to be scheduled")
-		}
-	})
-
-	t.Run("it schedules printing of blinding values", func(t *testing.T) {
-		in := strings.NewReader("Chris wins\n")
-		playerStore := &poker.StubPlayerStore{}
-		blindAlerter := &SpyBlindAlerter{}
-
-		cli := poker.NewCLI(playerStore, in, blindAlerter)
-		cli.PlayPoker()
-
 		cases := []struct {
 			expectedScheduleTime time.Duration
 			expectedAmount       int
