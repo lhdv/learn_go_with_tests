@@ -16,6 +16,7 @@ type BlindAlerter interface {
 type CLI struct {
 	playerStore PlayerStore
 	in          *bufio.Scanner
+	alerter     BlindAlerter
 }
 
 // NewCLI return a new CLI struct based on a given store and io.Reader
@@ -23,11 +24,13 @@ func NewCLI(store PlayerStore, in io.Reader, alerter BlindAlerter) *CLI {
 	return &CLI{
 		store,
 		bufio.NewScanner(in),
+		alerter,
 	}
 }
 
 // PlayPoker start a poker game
 func (c *CLI) PlayPoker() {
+	c.alerter.ScheduleAlertAt(5*time.Second, 100)
 	userInput := c.readLine()
 	c.playerStore.RecordWin(extractWinner(userInput))
 }
