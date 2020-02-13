@@ -4,7 +4,13 @@ import (
 	"bufio"
 	"io"
 	"strings"
+	"time"
 )
+
+// BlindAlerter is a implementation interface to wrap time.AfterFunc
+type BlindAlerter interface {
+	ScheduleAlertAt(duration time.Duration, amount int)
+}
 
 // CLI struct to handle the command line application
 type CLI struct {
@@ -13,7 +19,7 @@ type CLI struct {
 }
 
 // NewCLI return a new CLI struct based on a given store and io.Reader
-func NewCLI(store PlayerStore, in io.Reader) *CLI {
+func NewCLI(store PlayerStore, in io.Reader, alerter BlindAlerter) *CLI {
 	return &CLI{
 		store,
 		bufio.NewScanner(in),

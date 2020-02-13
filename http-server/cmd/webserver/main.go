@@ -1,3 +1,5 @@
+// https://quii.gitbook.io/learn-go-with-tests/build-an-application/time#just-enough-information-on-poker
+
 package main
 
 import (

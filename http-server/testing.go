@@ -1,6 +1,8 @@
 package poker
 
-import "testing"
+import (
+	"testing"
+)
 
 // StubPlayerStore struct for testing purpouses
 type StubPlayerStore struct {
