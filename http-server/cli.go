@@ -15,7 +15,7 @@ type CLI struct {
 }
 
 // NewCLI return a new CLI struct based on a given store and io.Reader
-func NewCLI(store PlayerStore, in io.Reader, alerter BlindAlerter) *CLI {
+func NewCLI(store PlayerStore, in io.Reader, out io.Writer, alerter BlindAlerter) *CLI {
 	return &CLI{
 		store,
 		bufio.NewScanner(in),
