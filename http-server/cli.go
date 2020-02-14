@@ -8,6 +8,9 @@ import (
 	"time"
 )
 
+// PlayerPrompt message to ask how many players the game will have
+const PlayerPrompt = "Please enter the number of players: "
+
 // CLI struct to handle the command line application
 type CLI struct {
 	playerStore PlayerStore
@@ -28,7 +31,7 @@ func NewCLI(store PlayerStore, in io.Reader, out io.Writer, alerter BlindAlerter
 
 // PlayPoker start a poker game
 func (c *CLI) PlayPoker() {
-	fmt.Fprint(c.out, "Please enter the number of players: ")
+	fmt.Fprint(c.out, PlayerPrompt)
 	c.scheduleBlindAlerts()
 	userInput := c.readLine()
 	c.playerStore.RecordWin(extractWinner(userInput))
