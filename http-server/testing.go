@@ -1,7 +1,9 @@
 package poker
 
 import (
+	"fmt"
 	"testing"
+	"time"
 )
 
 // StubPlayerStore struct for testing purpouses
@@ -38,4 +40,24 @@ func AssertPlayerWin(t *testing.T, store *StubPlayerStore, winner string) {
 	if store.winCalls[0] != winner {
 		t.Errorf("did not store correct winner got %q want %q", store.winCalls[0], winner)
 	}
+}
+
+// ScheduledAlert keeps a duration of a given blind value will last
+type ScheduledAlert struct {
+	At     time.Duration
+	Amount int
+}
+
+func (s ScheduledAlert) String() string {
+	return fmt.Sprintf("%d chips at %v", s.Amount, s.At)
+}
+
+// SpyBlindAlerter for testing purpouses
+type SpyBlindAlerter struct {
+	Alerts []ScheduledAlert
+}
+
+// ScheduleAlertAt schedule an alert for a specific duration
+func (s *SpyBlindAlerter) ScheduleAlertAt(duration time.Duration, amount int) {
+	s.Alerts = append(s.Alerts, ScheduledAlert{duration, amount})
 }
