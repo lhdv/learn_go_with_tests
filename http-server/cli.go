@@ -11,6 +11,9 @@ import (
 // PlayerPrompt message to ask how many players the game will have
 const PlayerPrompt = "Please enter the number of players: "
 
+// BadPlayerInputErrMsg message when a non-numeric value for number of players is entered
+const BadPlayerInputErrMsg = "Bad value received for number of players, please try again with a number"
+
 // CLI struct to handle the command line application
 type CLI struct {
 	in   *bufio.Scanner
@@ -34,7 +37,7 @@ func (c *CLI) PlayPoker() {
 	numberOfPlayersInput := c.readLine()
 	numberOfPlayers, err := strconv.Atoi(strings.Trim(numberOfPlayersInput, "\n"))
 	if err != nil {
-		fmt.Fprint(c.out, "you're so silly.")
+		fmt.Fprint(c.out, BadPlayerInputErrMsg)
 		return
 	}
 
