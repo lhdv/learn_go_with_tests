@@ -9,11 +9,13 @@ import (
 )
 
 type GameSpy struct {
-	StartedWith int
-	FinishWith  string
+	StartedCalled bool
+	StartedWith   int
+	FinishWith    string
 }
 
 func (g *GameSpy) Start(numberOfPlayer int) {
+	g.StartedCalled = true
 	g.StartedWith = numberOfPlayer
 }
 
@@ -71,4 +73,16 @@ func TestCLI(t *testing.T) {
 
 	})
 
+	t.Run("it prints an error when a non numeric value is entered and does not start the game", func(t *testing.T) {
+		stdout := &bytes.Buffer{}
+		in := strings.NewReader("Pies\n")
+		game := &GameSpy{}
+
+		cli := poker.NewCLI(in, stdout, game)
+		cli.PlayPoker()
+
+		if game.StartedCalled {
+			t.Errorf("game should not have started")
+		}
+	})
 }

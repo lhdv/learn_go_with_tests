@@ -32,7 +32,10 @@ func (c *CLI) PlayPoker() {
 	fmt.Fprint(c.out, PlayerPrompt)
 
 	numberOfPlayersInput := c.readLine()
-	numberOfPlayers, _ := strconv.Atoi(strings.Trim(numberOfPlayersInput, "\n"))
+	numberOfPlayers, err := strconv.Atoi(strings.Trim(numberOfPlayersInput, "\n"))
+	if err != nil {
+		return
+	}
 
 	c.game.Start(numberOfPlayers)
 
