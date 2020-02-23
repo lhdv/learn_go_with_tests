@@ -2,23 +2,26 @@ package poker
 
 import (
 	"fmt"
-	"os"
+	"io"
 	"time"
 )
 
 // BlindAlerter is a implementation interface to wrap time.AfterFunc
 type BlindAlerter interface {
-	ScheduleAlertAt(duration time.Duration, amount int)
+	ScheduleAlertAt(duration time.Duration, amount int, to io.Writer)
 }
 
-type BlindAlerterFunc func(duration time.Duration, amount int)
+// BlindAlerterFunc a function type to allow implement BlindAlerter interface with a function
+type BlindAlerterFunc func(duration time.Duration, amount int, to io.Writer)
 
-func (a BlindAlerterFunc) ScheduleAlertAt(duration time.Duration, amount int) {
-	a(duration, amount)
+// ScheduleAlertAt is the implementation of BlindAlerter interface
+func (a BlindAlerterFunc) ScheduleAlertAt(duration time.Duration, amount int, to io.Writer) {
+	a(duration, amount, to)
 }
 
-func StdOutAlerter(duration time.Duration, amount int) {
+// Alerter print in stdout the blinds values
+func Alerter(duration time.Duration, amount int, to io.Writer) {
 	time.AfterFunc(duration, func() {
-		fmt.Fprintf(os.Stdout, "Blind is now %d\n", amount)
+		fmt.Fprintf(to, "Blind is now %d\n", amount)
 	})
 }
