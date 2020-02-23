@@ -17,7 +17,8 @@ func TestRecordingWinsAndRetrievingThem(t *testing.T) {
 	store, err := NewFileSystemPlayerStore(database)
 	assertNoError(t, err)
 
-	server := NewPlayerServer(store)
+	server := mustMakePlayerServer(t, store)
+
 	player := "Pepper"
 
 	server.ServeHTTP(httptest.NewRecorder(), newPostWinRequest(player))
@@ -56,7 +57,7 @@ func TestRecordingWinsAndRetrievingThem(t *testing.T) {
 		store, err := NewFileSystemPlayerStore(database)
 		assertNoError(t, err)
 
-		server := NewPlayerServer(store)
+		server := mustMakePlayerServer(t, store)
 		player := "Bob"
 
 		var wg sync.WaitGroup
