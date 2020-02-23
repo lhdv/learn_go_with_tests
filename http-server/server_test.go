@@ -122,15 +122,10 @@ func TestGame(t *testing.T) {
 
 		wsURL := "ws" + strings.TrimPrefix(server.URL, "http") + "/ws"
 
-		ws, _, err := websocket.DefaultDialer.Dial(wsURL, nil)
-		if err != nil {
-			t.Fatalf("could not open a ws connection on %s %v", wsURL, err)
-		}
+		ws := mustDialWS(t, wsURL)
 		defer ws.Close()
 
-		if err := ws.WriteMessage(websocket.TextMessage, []byte(winner)); err != nil {
-			t.Fatalf("could not send message over ws connection %v", err)
-		}
+		writeWSMessage(t, ws, winner)
 
 		time.Sleep(10 * time.Millisecond)
 		AssertPlayerWin(t, store, winner)
@@ -170,6 +165,21 @@ func getLeagueFromResponse(t *testing.T, body io.Reader) []Player {
 	return players
 }
 
+func assertResponseBody(t *testing.T, got, want string) {
+	t.Helper()
+	if got != want {
+		t.Errorf("got %q, want %q", got, want)
+	}
+}
+
+func writeWSMessage(t *testing.T, conn *websocket.Conn, msg string) {
+	t.Helper()
+
+	if err := conn.WriteMessage(websocket.TextMessage, []byte(msg)); err != nil {
+		t.Fatalf("could not send message over ws connection %v", err)
+	}
+}
+
 func newRequestLeague() *http.Request {
 	req, _ := http.NewRequest(http.MethodGet, "/league", nil)
 	return req
@@ -191,13 +201,6 @@ func newGameRequest() *http.Request {
 	return req
 }
 
-func assertResponseBody(t *testing.T, got, want string) {
-	t.Helper()
-	if got != want {
-		t.Errorf("got %q, want %q", got, want)
-	}
-}
-
 func mustMakePlayerServer(t *testing.T, store PlayerStore) *PlayerServer {
 	server, err := NewPlayerServer(store)
 	if err != nil {
@@ -206,4 +209,13 @@ func mustMakePlayerServer(t *testing.T, store PlayerStore) *PlayerServer {
 	}
 
 	return server
+}
+
+func mustDialWS(t *testing.T, url string) *websocket.Conn {
+	ws, _, err := websocket.DefaultDialer.Dial(url, nil)
+	if err != nil {
+		t.Fatalf("could not open a ws connection on %s %v", url, err)
+	}
+
+	return ws
 }
