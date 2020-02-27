@@ -1,15 +1,17 @@
-package poker
+package poker_test
 
 import (
 	"io/ioutil"
 	"testing"
+
+	poker "github.com/lhdv/learn_go_with_tests/http-server"
 )
 
 func TestTape_Write(t *testing.T) {
 	file, clean := createTempFile(t, "12345")
 	defer clean()
 
-	tape := &tape{file}
+	tape := &poker.Tape{file}
 
 	tape.Write([]byte("abc"))
 

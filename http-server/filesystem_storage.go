@@ -50,7 +50,7 @@ func NewFileSystemPlayerStore(file *os.File) (*FileSystemPlayerStore, error) {
 
 	return &FileSystemPlayerStore{
 		sync.RWMutex{},
-		json.NewEncoder(&tape{file}),
+		json.NewEncoder(&Tape{file}),
 		league,
 	}, nil
 }
