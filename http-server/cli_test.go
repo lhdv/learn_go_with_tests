@@ -26,10 +26,13 @@ func (g *GameSpy) Finish(winner string) {
 	g.FinishWith = winner
 }
 
-var dummyBlindAlerter = &poker.SpyBlindAlerter{}
-var dummyPlayerStore = &poker.StubPlayerStore{}
-var dummyStdIn = &bytes.Buffer{}
-var dummyStdOut = &bytes.Buffer{}
+var (
+	dummyBlindAlerter = &poker.SpyBlindAlerter{}
+	dummyPlayerStore  = &poker.StubPlayerStore{}
+	dummyStdIn        = &bytes.Buffer{}
+	dummyStdOut       = &bytes.Buffer{}
+	dummyGame         = &GameSpy{}
+)
 
 func TestCLI(t *testing.T) {
 
@@ -145,6 +148,6 @@ func assertFinishCalledWith(t *testing.T, game *GameSpy, winner string) {
 	t.Helper()
 
 	if game.FinishWith != winner {
-		t.Errorf("wanted Finish called with %v but got %v", winner, game.FinishWith)
+		t.Errorf("wanted Finish called with %v but got %q", winner, game.FinishWith)
 	}
 }
