@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-// StubPlayerStore struct for testing purpouses
+// StubPlayerStore struct for testing purpouses (implementation of PlayerStore interface)
 type StubPlayerStore struct {
 	Scores   map[string]int
 	WinCalls []string

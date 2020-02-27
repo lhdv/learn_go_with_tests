@@ -131,6 +131,24 @@ func TestGame(t *testing.T) {
 		time.Sleep(10 * time.Millisecond)
 		poker.AssertPlayerWin(t, store, winner)
 	})
+
+	t.Run("start a game with 3 players and declare Ruth the winner", func(t *testing.T) {
+		game := &GameSpy{}
+		winner := "Ruth"
+
+		server := httptest.NewServer(mustMakePlayerServer(t, dummyPlayerStore, game))
+		defer server.Close()
+
+		ws := mustDialWS(t, "ws"+strings.TrimPrefix(server.URL, "http")+"/ws")
+		defer ws.Close()
+
+		writeWSMessage(t, ws, "3")
+		writeWSMessage(t, ws, winner)
+
+		time.Sleep(10 * time.Millisecond)
+		assertGameStartedWith(t, game, 3)
+		assertFinishCalledWith(t, game, winner)
+	})
 }
 
 func assertContentType(t *testing.T, response *httptest.ResponseRecorder, want string) {
@@ -203,7 +221,7 @@ func newGameRequest() *http.Request {
 }
 
 func mustMakePlayerServer(t *testing.T, store poker.PlayerStore, game poker.Game) *poker.PlayerServer {
-	server, err := poker.NewPlayerServer(store)
+	server, err := poker.NewPlayerServer(store, dummyGame)
 	if err != nil {
 		t.Fatalf("error on creating server")
 		return nil
