@@ -103,7 +103,7 @@ func (p *PlayerServer) webSocket(w http.ResponseWriter, r *http.Request) {
 	p.game.Start(numberOfPlayers, ws)
 
 	winnerMsg := ws.WaitForMsg()
-	p.game.Finish(string(winnerMsg))
+	p.game.Finish(winnerMsg)
 }
 
 var wsUpgrader = websocket.Upgrader{

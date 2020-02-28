@@ -5,6 +5,7 @@ import (
 	"io"
 	"strings"
 	"testing"
+	"time"
 
 	poker "github.com/lhdv/learn_go_with_tests/http-server"
 )
@@ -12,12 +13,16 @@ import (
 type GameSpy struct {
 	StartedCalled bool
 	StartedWith   int
+	FinishCalled  bool
 	FinishWith    string
+
+	BlindAlert []byte
 }
 
 func (g *GameSpy) Start(numberOfPlayer int, alertDestination io.Writer) {
 	g.StartedCalled = true
 	g.StartedWith = numberOfPlayer
+	alertDestination.Write(g.BlindAlert)
 }
 
 func (g *GameSpy) Finish(winner string) {
@@ -124,7 +129,22 @@ func assertGameStartedWith(t *testing.T, game *GameSpy, players int) {
 func assertFinishCalledWith(t *testing.T, game *GameSpy, winner string) {
 	t.Helper()
 
-	if game.FinishWith != winner {
+	passed := retryUntil(500*time.Millisecond, func() bool {
+		return game.FinishWith == winner
+	})
+
+	if !passed {
 		t.Errorf("wanted Finish called with %v but got %q", winner, game.FinishWith)
 	}
+}
+
+func retryUntil(d time.Duration, f func() bool) bool {
+	deadline := time.Now().Add(d)
+	for time.Now().Before(deadline) {
+		if f() {
+			return true
+		}
+	}
+
+	return false
 }
