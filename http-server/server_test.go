@@ -114,24 +114,6 @@ func TestGame(t *testing.T) {
 		assertStatus(t, response, http.StatusOK)
 	})
 
-	t.Run("when we get a message from websocket it's a winner of a game", func(t *testing.T) {
-		store := &poker.StubPlayerStore{}
-		winner := "Ruth"
-
-		server := httptest.NewServer(mustMakePlayerServer(t, store, dummyGame))
-		defer server.Close()
-
-		wsURL := "ws" + strings.TrimPrefix(server.URL, "http") + "/ws"
-
-		ws := mustDialWS(t, wsURL)
-		defer ws.Close()
-
-		writeWSMessage(t, ws, winner)
-
-		time.Sleep(10 * time.Millisecond)
-		poker.AssertPlayerWin(t, store, winner)
-	})
-
 	t.Run("start a game with 3 players and declare Ruth the winner", func(t *testing.T) {
 		game := &GameSpy{}
 		winner := "Ruth"
@@ -191,14 +173,6 @@ func assertResponseBody(t *testing.T, got, want string) {
 	}
 }
 
-func writeWSMessage(t *testing.T, conn *websocket.Conn, msg string) {
-	t.Helper()
-
-	if err := conn.WriteMessage(websocket.TextMessage, []byte(msg)); err != nil {
-		t.Fatalf("could not send message over ws connection %v", err)
-	}
-}
-
 func newRequestLeague() *http.Request {
 	req, _ := http.NewRequest(http.MethodGet, "/league", nil)
 	return req
@@ -221,7 +195,7 @@ func newGameRequest() *http.Request {
 }
 
 func mustMakePlayerServer(t *testing.T, store poker.PlayerStore, game poker.Game) *poker.PlayerServer {
-	server, err := poker.NewPlayerServer(store, dummyGame)
+	server, err := poker.NewPlayerServer(store, game)
 	if err != nil {
 		t.Fatalf("error on creating server")
 		return nil
@@ -237,4 +211,12 @@ func mustDialWS(t *testing.T, url string) *websocket.Conn {
 	}
 
 	return ws
+}
+
+func writeWSMessage(t *testing.T, conn *websocket.Conn, msg string) {
+	t.Helper()
+
+	if err := conn.WriteMessage(websocket.TextMessage, []byte(msg)); err != nil {
+		t.Fatalf("could not send message over ws connection %v", err)
+	}
 }
